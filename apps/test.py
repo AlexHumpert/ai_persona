@@ -97,86 +97,44 @@ def create_system_prompt(description: str) -> str:
     5. Maintain consistent personality traits aligned with your purchase motivations
     6. Reference specific Patagonia products or initiatives when relevant
 
-    Evaluate any marketing materials or images from the perspective of your environmental 
-    concern level, activity needs, and relationship with the brand.
+    Remember to stay authentic to your defined characteristics while engaging naturally in conversation.
+    Approach marketing materials from the perspective of your environmental concern level and activity needs.
     """
     return prompt.strip()
 
-def analyze_image(image, persona_description):
-    """Analyze image from persona's perspective using GPT-4o."""
+def analyze_content(content: str, persona_description: str) -> str:
+    """Analyze marketing content from persona's perspective."""
     try:
-        # Convert image to RGB mode if it's in RGBA
-        if image.mode in ('RGBA', 'LA') or (image.mode == 'P' and 'transparency' in image.info):
-            background = Image.new('RGB', image.size, (255, 255, 255))
-            if image.mode == 'RGBA':
-                background.paste(image, mask=image.split()[3])
-            else:
-                background.paste(image)
-            image = background
-
-        # Convert PIL Image to bytes
-        img_byte_arr = io.BytesIO()
-        image.save(img_byte_arr, format='JPEG', quality=95)
-        img_byte_arr = img_byte_arr.getvalue()
-        
         system_prompt = create_system_prompt(persona_description)
         user_prompt = """
-        Please evaluate this image and express your opinion about it. Consider:
+        Please evaluate this marketing content and express your opinion about it. 
+        Consider:
         1. How well does it align with your environmental values?
-        2. Does it authentically represent outdoor activities at your level?
-        3. Would this visual content resonate with you and make you engage with the brand?
-        4. How effectively does it communicate to your demographic?
+        2. Does it address your specific needs as an outdoor enthusiast?
+        3. Is the messaging authentic to Patagonia's brand values?
+        4. Would this motivate you to make a purchase or engage with the brand?
         
-        Share your perspective based on your characteristics and preferences.
+        Provide specific feedback on what works and what could be improved.
         """
 
         response = client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": system_prompt},
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": user_prompt},
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{base64.b64encode(img_byte_arr).decode('utf-8')}",
-                                "detail": "high"
-                            }
-                        }
-                    ]
-                }
+                {"role": "user", "content": user_prompt + "\n\nContent to analyze:\n" + content}
             ],
             max_tokens=2000
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
-        return f"Error analyzing image: {str(e)}"
+        return f"Error analyzing content: {str(e)}"
 
 # Streamlit UI
-st.title("🎯 Synthetic Persona Pre-Test")
-
-st.write("""
-Test your marketing content against lifelike customer personas before launching your campaigns. 
-Synthetic personas simulate real customer responses based on detailed demographic, psychographic, 
-and behavioral characteristics.
-""")
-
-st.markdown("""
-**Common Use Cases:**
-- Test campaign messaging across different customer segments
-- Validate social media content with target audience personas
-- Preview how product descriptions resonate with specific customer types
-- Assess marketing visuals across different customer profiles
-- Refine email marketing copy for different subscriber segments
-""")
-
+st.title("Patagonia Marketing Persona Analyzer")
 
 # Persona Configuration
 st.header("1. Define Target Persona")
 
-# Create columns for better layout
 col1, col2 = st.columns(2)
 
 with col1:
@@ -217,19 +175,24 @@ if st.button("Generate Persona"):
     st.subheader("Generated Persona")
     st.write(persona)
 
-# Image Upload and Analysis
+# Content Analysis
 if 'persona' in st.session_state:
-    st.header("2. Upload Image for Analysis")
-    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    st.header("2. Test Marketing Content")
     
-    if uploaded_file is not None:
-        image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Image", use_column_width=True)
-        
-        if st.button("Analyze Image"):
-            with st.spinner("Analyzing image..."):
-                analysis = analyze_image(image, st.session_state['persona'])
-                st.subheader("Persona's Opinion")
-                st.write(analysis)
+    content_type = st.radio(
+        "Content Type",
+        ["Marketing Copy", "Product Description", "Campaign Message", "Social Media Post"]
+    )
+    
+    marketing_content = st.text_area(
+        "Enter your marketing content for analysis...",
+        height=200
+    )
+    
+    if marketing_content and st.button("Analyze Content"):
+        with st.spinner("Analyzing content..."):
+            analysis = analyze_content(marketing_content, st.session_state['persona'])
+            st.subheader("Persona's Opinion")
+            st.write(analysis)
 else:
-    st.info("Please generate a persona first before uploading an image.")
+    st.info("Please generate a persona first before testing marketing content.")
