@@ -1,4 +1,4 @@
-# 🎯 Synthetic Persona Pre-Test™
+# 🎯 Synthetic Persona Pre-Test
 ## Marketing Innovation at Your Fingertips
 Transform your marketing campaign testing with AI-powered synthetic personas. Pre-test your marketing content against detailed customer personas before launch, reducing risk and maximizing campaign effectiveness.
 
