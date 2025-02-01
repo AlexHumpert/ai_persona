@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
@@ -21,3 +21,8 @@ EXPOSE 8080
 
 # Command to run the application
 CMD streamlit run main.py --server.port 8080 --server.address 0.0.0.0
+
+
+
+
+
