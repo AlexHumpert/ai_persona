@@ -11,8 +11,11 @@ dotenv_path = os.path.join(os.path.dirname(__file__), '..', 'configs', '.env')
 load_dotenv(dotenv_path)
 openai_api_key = os.getenv('OPENAI_API_KEY')
 
-# Initialize OpenAI client
-client = OpenAI(api_key=openai_api_key)
+# Initialize OpenAI client without proxies
+client = OpenAI(
+    api_key=openai_api_key,
+    base_url="https://api.openai.com/v1"  # Explicitly set the base URL
+)
 
 def generate_persona_description(activity_level: str, environmental_concern: str, 
                                age_range: tuple, location: str, purchase_motivation: str) -> str:
