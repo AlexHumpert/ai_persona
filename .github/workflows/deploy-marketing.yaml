@@ -81,4 +81,6 @@ jobs:
             --platform managed \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
-            --port ${{ env.PORT }}
+            --port ${{ env.PORT }} \
+            --service-account="397812137944-compute@developer.gserviceaccount.com" \
+            --set-secrets=OPENAI_API_KEY=openai-api-key:latest
