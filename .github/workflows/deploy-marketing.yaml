@@ -50,12 +50,17 @@ jobs:
         run: |
           gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
-      - name: Create Artifact Registry repository
+      - name: Create Artifact Registry repository if not exists
         run: |
-          gcloud artifacts repositories create ${{ env.REPO_NAME }} \
-            --repository-format=docker \
-            --location=${{ env.REGION }} \
-            --description="AI Persona repository"
+          if ! gcloud artifacts repositories describe ai-persona \
+            --location=${{ env.REGION }} 2>/dev/null; then
+            gcloud artifacts repositories create ai-persona \
+              --repository-format=docker \
+              --location=${{ env.REGION }} \
+              --description="AI Persona repository"
+          else
+            echo "Repository already exists, continuing..."
+          fi
 
       - name: Build Docker image
         run: |
