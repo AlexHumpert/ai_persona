@@ -5,6 +5,10 @@ from PIL import Image
 import io
 from dotenv import load_dotenv
 import os
+import warnings
+
+# Filter out the specific deprecation warning
+warnings.filterwarnings('ignore', message='.*use_column_width.*')
 
 # Try to load local environment variables, fallback to system environment variables
 try:
@@ -234,7 +238,7 @@ if 'persona' in st.session_state:
     
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Image", use_column_width=True)
+        st.image(image, caption="Uploaded Image", use_container_width=True)
         
         if st.button("Analyze Image"):
             with st.spinner("Analyzing image..."):
