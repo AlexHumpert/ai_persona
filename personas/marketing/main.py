@@ -155,7 +155,7 @@ def analyze_image(image, persona_description):
         return f"Error analyzing image: {str(e)}"
 
 # Streamlit UI
-st.title("🎯 Synthetic Persona Pre-Test")
+st.title("🎯 Synthetic Persona Pre-Test Platform")
 
 st.write("""
 Test your marketing content against lifelike customer personas before launching your campaigns. 
