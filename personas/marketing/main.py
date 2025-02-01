@@ -6,16 +6,23 @@ import io
 from dotenv import load_dotenv
 import os
 
-# Load environment variables
-dotenv_path = os.path.join(os.path.dirname(__file__), '..', 'configs', '.env')
-load_dotenv(dotenv_path)
+# Try to load local environment variables, fallback to system environment variables
+try:
+    dotenv_path = os.path.join(os.path.dirname(__file__), 'configs', '.env')
+    load_dotenv(dotenv_path)
+except Exception as e:
+    st.debug(f"No local .env file found, using system environment variables: {e}")
+
+# Get API key from environment variables (works with both local .env and Cloud Run secrets)
 openai_api_key = os.getenv('OPENAI_API_KEY')
 
-# Initialize OpenAI client without proxies
-client = OpenAI(
-    api_key=openai_api_key,
-    base_url="https://api.openai.com/v1"  # Explicitly set the base URL
-)
+if not openai_api_key:
+    st.error("OpenAI API key not found. Please check your environment configuration.")
+    st.stop()
+
+# Initialize OpenAI client
+client = OpenAI(api_key=openai_api_key)
+
 
 def generate_persona_description(activity_level: str, environmental_concern: str, 
                                age_range: tuple, location: str, purchase_motivation: str) -> str:
