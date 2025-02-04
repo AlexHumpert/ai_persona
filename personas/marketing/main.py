@@ -3,29 +3,48 @@ from openai import OpenAI
 import base64
 from PIL import Image
 import io
-from dotenv import load_dotenv
-import os
 import warnings
 
 # Filter out the specific deprecation warning
 warnings.filterwarnings('ignore', message='.*use_column_width.*')
 
-# Try to load local environment variables, fallback to system environment variables
-try:
-    dotenv_path = os.path.join(os.path.dirname(__file__), 'configs', '.env')
-    load_dotenv(dotenv_path)
-except Exception as e:
-    st.debug(f"No local .env file found, using system environment variables: {e}")
+# Initialize session state for API key if not already present
+if 'openai_client' not in st.session_state:
+    st.session_state['openai_client'] = None
 
-# Get API key from environment variables (works with both local .env and Cloud Run secrets)
-openai_api_key = os.getenv('OPENAI_API_KEY')
+def initialize_openai_client(api_key: str) -> None:
+    """Initialize OpenAI client with provided API key"""
+    try:
+        st.session_state['openai_client'] = OpenAI(api_key=api_key)
+        return True
+    except Exception as e:
+        st.error(f"Error initializing OpenAI client: {str(e)}")
+        return False
 
-if not openai_api_key:
-    st.error("OpenAI API key not found. Please check your environment configuration.")
-    st.stop()
+# API Key Input Section
+st.sidebar.header("📝 API Configuration")
 
-# Initialize OpenAI client
-client = OpenAI(api_key=openai_api_key)
+# Add API key input to sidebar
+api_key = st.sidebar.text_input(
+    "Enter your OpenAI API key",
+    type="password",
+    help="You can find your API key at https://platform.openai.com/api-keys"
+)
+
+# Initialize button
+if api_key and st.sidebar.button("Initialize API"):
+    if initialize_openai_client(api_key):
+        st.sidebar.success("API key successfully configured!")
+
+
+# Rest of your application code remains the same, but replace 'client' with 'st.session_state['openai_client']'
+st.title("🎯 Persona Pre-Testing Platform")
+
+st.write("""
+Test your marketing content against lifelike customer personas before launching your campaigns. 
+Synthetic personas simulate real customer responses based on detailed demographic, psychographic, 
+and behavioral characteristics.
+""")
 
 
 def generate_persona_description(activity_level: str, environmental_concern: str, 
@@ -118,6 +137,9 @@ def create_system_prompt(description: str) -> str:
 
 def analyze_image(image, persona_description):
     """Analyze image from persona's perspective using GPT-4o."""
+    if st.session_state['openai_client'] is None:
+        return "Error: OpenAI API key not configured. Please add your API key in the sidebar."
+        
     try:
         # Convert image to RGB mode if it's in RGBA
         if image.mode in ('RGBA', 'LA') or (image.mode == 'P' and 'transparency' in image.info):
@@ -144,7 +166,7 @@ def analyze_image(image, persona_description):
         Share your perspective based on your characteristics and preferences.
         """
 
-        response = client.chat.completions.create(
+        response = st.session_state['openai_client'].chat.completions.create(
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -168,14 +190,8 @@ def analyze_image(image, persona_description):
     except Exception as e:
         return f"Error analyzing image: {str(e)}"
 
-# Streamlit UI
-st.title("🎯 Persona Pre-Testing Platform")
+# Streamlit UI Continued
 
-st.write("""
-Test your marketing content against lifelike customer personas before launching your campaigns. 
-Synthetic personas simulate real customer responses based on detailed demographic, psychographic, 
-and behavioral characteristics.
-""")
 
 st.markdown("""
 **Common Use Cases:**
@@ -234,11 +250,12 @@ if st.button("Generate Persona"):
 # Image Upload and Analysis
 if 'persona' in st.session_state:
     st.header("2. Upload Image for Analysis")
+    st.write("Analysis requires entering OpenAI API key")
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
     
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Image", use_container_width=True)
+        st.image(image, caption="Uploaded Image")
         
         if st.button("Analyze Image"):
             with st.spinner("Analyzing image..."):
