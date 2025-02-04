@@ -132,7 +132,7 @@ else:
             
             if uploaded_file:
                 image = Image.open(uploaded_file)
-                st.image(image, caption=f"Variation {chr(65 + idx)}", use_column_width=True)
+                st.image(image, caption=f"Variation {chr(65 + idx)}")
                 uploaded_images.append(image)
                 image_names.append(uploaded_file.name)
             else:
@@ -163,7 +163,7 @@ else:
                     cols = st.columns(len(st.session_state['uploaded_images']))
                     for idx, (col, img) in enumerate(zip(cols, st.session_state['uploaded_images'])):
                         with col:
-                            st.image(img, caption=f"Variation {chr(65 + idx)}", use_column_width=True)
+                            st.image(img, caption=f"Variation {chr(65 + idx)}")
                     
                     # Display analysis
                     st.markdown("### Persona's Comparative Analysis")
