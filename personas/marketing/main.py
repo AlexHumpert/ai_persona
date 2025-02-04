@@ -110,16 +110,15 @@ and behavioral characteristics.
 
 st.markdown("""
 **Available Features:**
+- Persona Customization: Create detailed customer profiles for targeted feedback
 - Single Image Analysis: Get detailed feedback on individual marketing visuals
 - A/B/N Testing: Compare multiple content variations to identify the most effective options
-- Persona Customization: Create detailed customer profiles for targeted feedback
+
 
 **Common Use Cases:**
-- Test campaign messaging across different customer segments
-- Validate social media content with target audience personas
+- Test campaign messaging and content across different customer segments
 - Preview how product descriptions resonate with specific customer types
-- Assess marketing visuals across different customer profiles
-- Refine email marketing copy for different subscriber segments
+- Assess marketing visuals across different customer profiles and segments
 """)
 
 # Persona Configuration

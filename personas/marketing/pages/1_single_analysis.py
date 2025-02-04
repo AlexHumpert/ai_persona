@@ -2,6 +2,10 @@ import streamlit as st
 import base64
 from PIL import Image
 import io
+import warnings
+
+# Filter out the specific deprecation warning
+warnings.filterwarnings('ignore', message='.*use_column_width.*')
 
 def create_system_prompt(description: str) -> str:
     """Generates AI system prompt from persona description"""
